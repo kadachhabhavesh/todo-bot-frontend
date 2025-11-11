@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Delius&family=Sora:wght@100..800&family=Special+Elite&family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
+
+/* Define theme variables directly */
+@theme {
+  --font-sans: "Sora", sans-serif;
+  --font-display: "Sora", sans-serif;
+  --font-body: "Titillium Web", sans-serif;
+  --font-hand: "Delius", cursive;
+}
+
+@utility font-sans {
+  font-family: var(--font-sans);
+}
