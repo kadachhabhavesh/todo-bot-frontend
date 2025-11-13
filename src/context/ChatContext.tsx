@@ -1,67 +1,63 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import type { ChatContextType, Message } from "../constants";
+import {
+  ASSISTANT_RESPONSE_LOADING_MESSAGE,
+  MESSAGE_TYPE,
+  type ChatContextType,
+  type Message,
+} from "../constants";
+import {
+  createClient,
+  type PostgrestSingleResponse,
+} from "@supabase/supabase-js";
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_API_URL,
+  import.meta.env.VITE_SUPABASE_API_KEY
+);
 
-export const chatHistoryDummy: Message[] = [
-  {
-    sender: "assistant",
-    text: "Hi Bhavesh! I’m your To-Do Assistant. How can I help today?",
-    timestamp: "2025-11-11T10:00:00Z",
-  },
-  {
-    sender: "user",
-    text: "Show my todos",
-    timestamp: "2025-11-11T10:00:05Z",
-  },
-  {
-    sender: "assistant",
-    text: "Sure! Here’s what you have on your list:",
-    todos: [
-      { id: 1, task: "Buy groceries⚠️", done: false },
-      { id: 2, task: "Finish React project✔️", done: true },
-      { id: 3, task: "Call the bank✔️", done: false },
-    ],
-    timestamp: "2025-11-11T10:00:08Z",
-  },
-  {
-    sender: "user",
-    text: "Mark Finish React project as done",
-    timestamp: "2025-11-11T10:00:15Z",
-  },
-  {
-    sender: "assistant",
-    text: "Done! Task marked as completed.",
-    timestamp: "2025-11-11T10:00:17Z",
-  },
-  {
-    sender: "user",
-    text: "Add new todo — Schedule meeting with client",
-    timestamp: "2025-11-11T10:00:25Z",
-  },
-  {
-    sender: "assistant",
-    text: "Added “Schedule meeting with client” to your list!",
-    timestamp: "2025-11-11T10:00:27Z",
-  },
-  {
-    sender: "assistant",
-    text: "Would you like to set a due date or priority?",
-    timestamp: "2025-11-11T10:00:30Z",
-  },
-];
-
-export const ChatContext = createContext<ChatContextType | undefined>(undefined);
+export const ChatContext = createContext<ChatContextType | undefined>(
+  undefined
+);
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
-  const [chatHistory, setChatHistory] = useState<Message[]>(chatHistoryDummy);
+  const [chatHistory, setChatHistory] = useState<Message[]>([]);
 
   const addMessage = (message: Message) => {
-    setChatHistory((prev) => [...prev, message]);
+    const loading_message: Message = {
+      role: MESSAGE_TYPE.LOADING,
+      content:{
+        isOnlyTextMessage: true,
+        reply: ASSISTANT_RESPONSE_LOADING_MESSAGE
+      },
+    };
+    setChatHistory((prev) => [...prev, message,loading_message]);
   };
 
   const clearChat = () => setChatHistory([]);
 
+  const fetchChatHistory = async () => {
+    const { data }: PostgrestSingleResponse<Message[]> = await supabase
+      .from("chat_messages")
+      .select("*")
+      .in("message_type", ["input", "output"])
+      .order("id",{ ascending: true });
+
+    const chatHistoryData = data?.map((message) => {
+      if (message.message_type === "input") {
+        message.content = { isOnlyTextMessage: true, reply: message.content };
+        return message;
+      } else if (message.message_type === "output") {
+        message.content = JSON.parse(message.content).output;
+        return message;
+      }
+    });
+    console.log(chatHistoryData);
+    setChatHistory(data ?? []);
+  };
+
   return (
-    <ChatContext.Provider value={{ chatHistory, addMessage, clearChat }}>
+    <ChatContext.Provider
+      value={{ chatHistory, addMessage, clearChat, fetchChatHistory }}
+    >
       {children}
     </ChatContext.Provider>
   );
