@@ -34,7 +34,10 @@ function App() {
     }
     addMessage({
       role: MESSAGE_TYPE.USER,
-      content: message
+      content: {
+        isOnlyTextMessage: true,
+        reply: message
+      }
     });
     setMessage("");
   };
@@ -48,7 +51,10 @@ function App() {
   const handleTagClick = (event: MouseEvent<HTMLButtonElement>) => {
     addMessage({
       role: MESSAGE_TYPE.USER,
-      content: event.target.innerHTML
+      content: {
+        isOnlyTextMessage: true,
+        reply: event.target.innerHTML
+      }
     });
   };
 
@@ -60,8 +66,8 @@ function App() {
   }, [chatHistory]);
 
   return (
-    <div className="bg-background h-screen flex justify-center items-center font-mono overflow-hidden -mb-6">
-      <div className="w-[450px] h-full grid grid-rows-[75%_25%] pt-5">
+    <div className="bg-background h-screen flex justify-center items-center font-mono overflow-hidden py-5 -mb-6">
+      <div className="w-[450px] h-full grid">
         <div
           ref={chatContainerRef}
           className="flex flex-col overflow-y-auto scroll-smooth"
@@ -69,7 +75,7 @@ function App() {
           {chatHistory.map((message) => {
             if (message.role === MESSAGE_TYPE.USER) {
               return (
-                <div className="bg-linear-to-r/srgb to-purple-500 from-blue-400 text-white py-2 px-3 mt-5 rounded-full text-xs max-w-3/4 mr-2 self-end relative shadow-xl">
+                <div className="bg-linear-to-r/srgb to-purple-500 from-blue-400 text-white py-2 px-3 mb-5 rounded-full text-xs max-w-3/4 mr-2 self-end relative shadow-xl">
                   {message.content.reply}
                   <div className="w-3 h-3 bg-purple-500 rounded-full absolute top-0 right-0"></div>
                   <div className="w-1.5 h-1.5 bg-purple-500 rounded-full absolute -top-1.5 -right-1.5"></div>
@@ -78,7 +84,7 @@ function App() {
             } else if (message.role === MESSAGE_TYPE.ASSISTANT) {
               return (
                 <div
-                  className="w-fit max-w-full bg-assistant-message py-2 px-3 mt-5 rounded-2xl text-xs ml-2 relative shadow-xl"
+                  className="w-fit max-w-full bg-assistant-message py-2 px-3 mb-5 rounded-2xl text-xs ml-2 relative shadow-xl"
                 >
                   {message.content.reply}
                   {!message.content.isOnlyTextMessage && (
@@ -123,7 +129,7 @@ function App() {
               );
             } else {
               return (
-                <div className="text-xs mt-5">
+                <div className="text-xs mb-5">
                   <span>{message.content.reply}</span>
                 </div>
               );
