@@ -5,15 +5,6 @@ export interface Todo {
   dueDate: string;
 }
 
-export enum MESSAGE_TYPE {
-  USER = "user",
-  ASSISTANT = "model",
-  LOADING = "loading",
-}
-
-export const ASSISTANT_RESPONSE_LOADING_MESSAGE =
-  "Analyzing data, please wait...";
-
 export interface Message {
   id?: number;
   created_at?: string;
@@ -30,4 +21,26 @@ export interface ChatContextType {
   fetchChatHistory: () => void;
 }
 
+export interface AssistantApiResponse {
+  isSucces: boolean;
+  data: {
+    type: "output" | "input",
+    output: {
+      isOnlyTextMessage: boolean,
+      reply: string,
+      todos?: Todo[]
+    }
+  }
+}
+
 export const MAX_MESSAGE_LENGTH = 150;
+
+export const ASSISTANT_RESPONSE_LOADING_MESSAGE =
+  "Analyzing data, please wait...";
+
+export enum MESSAGE_TYPE {
+  USER = "user",
+  ASSISTANT = "model",
+  LOADING = "loading",
+}
+

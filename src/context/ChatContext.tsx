@@ -40,8 +40,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       .select("*")
       .in("message_type", ["input", "output"])
       .order("id",{ ascending: true });
-
-    const chatHistoryData = data?.map((message) => {
+      
+    data?.forEach((message: Message) => {
       if (message.message_type === "input") {
         message.content = { isOnlyTextMessage: true, reply: message.content };
         return message;
@@ -50,7 +50,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         return message;
       }
     });
-    console.log(chatHistoryData);
+    
     setChatHistory(data ?? []);
   };
 
