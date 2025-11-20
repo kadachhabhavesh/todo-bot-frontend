@@ -9,6 +9,7 @@ import {
   createClient,
   type PostgrestSingleResponse,
 } from "@supabase/supabase-js";
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_API_URL,
   import.meta.env.VITE_SUPABASE_API_KEY
@@ -20,16 +21,10 @@ export const ChatContext = createContext<ChatContextType | undefined>(
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
+  const [isAssistantMessagePendding, setIsAssistantMessagePendding] = useState<boolean>(false);
 
   const addMessage = (message: Message) => {
-    const loading_message: Message = {
-      role: MESSAGE_TYPE.LOADING,
-      content:{
-        isOnlyTextMessage: true,
-        reply: ASSISTANT_RESPONSE_LOADING_MESSAGE
-      },
-    };
-    setChatHistory((prev) => [...prev, message,loading_message]);
+    setChatHistory((prev) => [...prev, message]);
   };
 
   const clearChat = () => setChatHistory([]);
@@ -54,9 +49,13 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setChatHistory(data ?? []);
   };
 
+  const updateAssistantMessageStatus = (status: boolean) => {
+    setIsAssistantMessagePendding(status);
+  }
+
   return (
     <ChatContext.Provider
-      value={{ chatHistory, addMessage, clearChat, fetchChatHistory }}
+      value={{ chatHistory, isAssistantMessagePendding, addMessage, clearChat, fetchChatHistory, updateAssistantMessageStatus }}
     >
       {children}
     </ChatContext.Provider>

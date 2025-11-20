@@ -35,8 +35,6 @@ function AssistantMessage({ message }: { message: Message }) {
           </table>
         </div>
       )}
-      <div className="w-3 h-3 bg-assistant-message rounded-full absolute top-0 left-0"></div>
-      <div className="w-1.5 h-1.5 bg-assistant-message rounded-full absolute -top-1.5 -left-1.5"></div>
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import type { Message } from "../../constants";
+import { ASSISTANT_RESPONSE_LOADING_MESSAGE } from "../../constants";
 
-function ResponseLoading({ message }: { message: Message }) {
+function ResponseLoading() {
   return (
     <div className="text-xs mb-5">
-      <span>{message.content.reply}</span>
+      <span>{ASSISTANT_RESPONSE_LOADING_MESSAGE}</span>
     </div>
   );
 }

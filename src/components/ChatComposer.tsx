@@ -8,7 +8,7 @@ import { sendMessageToAssistant } from "../services/assistantApiService";
 function ChatComposer() {
   const [message, setMessage] = useState<string>("");
   const [messageError, setMessageError] = useState<string>("");
-  const { addMessage } = useChat();
+  const { addMessage, updateAssistantMessageStatus } = useChat();
 
   const handleMessageChnage = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
@@ -25,8 +25,9 @@ function ChatComposer() {
         reply: userMessage,
       },
     });
-    const assistantReply = await sendMessageToAssistant(message);
-    console.log("assistantReply", assistantReply);
+    updateAssistantMessageStatus(true);
+    const assistantReply = await sendMessageToAssistant(userMessage);
+    updateAssistantMessageStatus(false);
     addMessage({
       role: MESSAGE_TYPE.ASSISTANT,
       content: {

@@ -6,7 +6,7 @@ import AssistantMessage from "./messages/AssistantMessage";
 import ResponseLoading from "./messages/ResponseLoading";
 
 function Chat() {
-  const { chatHistory } = useChat();
+  const { chatHistory, isAssistantMessagePendding } = useChat();
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   
@@ -27,10 +27,9 @@ function Chat() {
           return <UserMessage key={message.id} message={message} />;
         } else if (message.role === MESSAGE_TYPE.ASSISTANT) {
           return <AssistantMessage key={message.id} message={message} />;
-        } else {
-          return <ResponseLoading key={message.id} message={message} />;
         }
       })}
+      {isAssistantMessagePendding && <ResponseLoading />}
     </div>
   );
 }
