@@ -16,6 +16,8 @@ export interface Message {
 
 export interface ChatContextType {
   chatHistory: Message[];
+  lastMessageId: number;
+  isLoadingMessages: boolean
   addMessage: (message: Message) => void;
   clearChat: () => void;
   fetchChatHistory: () => void;

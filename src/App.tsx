@@ -14,8 +14,8 @@ function App() {
   }, []);
 
   return (
-    <div className="bg-background h-screen flex justify-center items-center font-mono overflow-hidden py-5 -mb-6">
-      <div className="w-[450px] h-full grid">
+    <div className="bg-background h-screen flex justify-center items-center font-mono overflow-hidden px-3 sm:py-5 -mb-6">
+      <div className="w-[450px] h-full grid grid-rows-[80%_20%]">
         <Chat />
         <ChatComposer />
       </div>

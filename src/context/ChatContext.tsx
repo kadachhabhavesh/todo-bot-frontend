@@ -5,10 +5,7 @@ import {
   type ChatContextType,
   type Message,
 } from "../constants";
-import {
-  createClient,
-  type PostgrestSingleResponse,
-} from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_API_URL,
   import.meta.env.VITE_SUPABASE_API_KEY
@@ -20,28 +17,48 @@ export const ChatContext = createContext<ChatContextType | undefined>(
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
+  const [lastMessageId, setLastMessageId] = useState<number | undefined>(undefined);
+  const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
 
   const addMessage = (message: Message) => {
     const loading_message: Message = {
       role: MESSAGE_TYPE.LOADING,
-      content:{
+      content: {
         isOnlyTextMessage: true,
-        reply: ASSISTANT_RESPONSE_LOADING_MESSAGE
+        reply: ASSISTANT_RESPONSE_LOADING_MESSAGE,
       },
     };
-    setChatHistory((prev) => [...prev, message,loading_message]);
+    setChatHistory((prev) => [...prev, message, loading_message]);
   };
 
   const clearChat = () => setChatHistory([]);
 
   const fetchChatHistory = async () => {
-    const { data }: PostgrestSingleResponse<Message[]> = await supabase
-      .from("chat_messages")
-      .select("*")
-      .in("message_type", ["input", "output"])
-      .order("id",{ ascending: true });
-      
-    data?.forEach((message: Message) => {
+    setIsLoadingMessages(true);
+    let fetchedChatHistory: Message[];
+    if (lastMessageId) {
+      const { data } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .in("message_type", ["input", "output"])
+        .lt("id", lastMessageId)
+        .order("id", { ascending: false })
+        .limit(10);
+      fetchedChatHistory = data!.reverse() ?? [];
+      setIsLoadingMessages(false);
+    } else {
+      setIsLoadingMessages(true);
+      const { data } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .in("message_type", ["input", "output"])
+        .order("id", { ascending: false })
+        .limit(10);
+      fetchedChatHistory = data!.reverse() ?? [];
+      setIsLoadingMessages(false);
+    }
+    
+    fetchedChatHistory?.forEach((message: Message) => {
       if (message.message_type === "input") {
         message.content = { isOnlyTextMessage: true, reply: message.content };
         return message;
@@ -50,13 +67,25 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         return message;
       }
     });
-    
-    setChatHistory(data ?? []);
+    if(fetchedChatHistory.length>0){
+      setLastMessageId(fetchedChatHistory[0].id!);
+      setChatHistory((prevChatHistory) => [
+        ...fetchedChatHistory,
+        ...prevChatHistory,
+      ]);
+    }
   };
 
   return (
     <ChatContext.Provider
-      value={{ chatHistory, addMessage, clearChat, fetchChatHistory }}
+      value={{
+        chatHistory,
+        lastMessageId: lastMessageId!,
+        isLoadingMessages,
+        addMessage,
+        clearChat,
+        fetchChatHistory,
+      }}
     >
       {children}
     </ChatContext.Provider>
