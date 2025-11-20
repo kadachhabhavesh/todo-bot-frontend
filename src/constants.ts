@@ -1,5 +1,3 @@
-import AssistantMessage from "./components/messages/AssistantMessage";
-
 export interface Todo {
   id: number;
   task: string;
@@ -18,7 +16,8 @@ export interface Message {
 
 export interface ChatContextType {
   chatHistory: Message[];
-  isAssistantMessagePendding: boolean
+  lastMessageId: number;
+  isLoadingMessages: boolean;
   addMessage: (message: Message) => void;
   clearChat: () => void;
   fetchChatHistory: () => void;

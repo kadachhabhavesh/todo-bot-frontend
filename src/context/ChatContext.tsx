@@ -1,13 +1,11 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import {
-  ASSISTANT_RESPONSE_LOADING_MESSAGE,
-  MESSAGE_TYPE,
   type ChatContextType,
   type Message,
 } from "../constants";
+
 import {
-  createClient,
-  type PostgrestSingleResponse,
+  createClient
 } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -22,6 +20,8 @@ export const ChatContext = createContext<ChatContextType | undefined>(
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const [isAssistantMessagePendding, setIsAssistantMessagePendding] = useState<boolean>(false);
+  const [lastMessageId, setLastMessageId] = useState<number | undefined>(undefined);
+  const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
 
   const addMessage = (message: Message) => {
     setChatHistory((prev) => [...prev, message]);
@@ -30,13 +30,31 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const clearChat = () => setChatHistory([]);
 
   const fetchChatHistory = async () => {
-    const { data }: PostgrestSingleResponse<Message[]> = await supabase
-      .from("chat_messages")
-      .select("*")
-      .in("message_type", ["input", "output"])
-      .order("id",{ ascending: true });
-      
-    data?.forEach((message: Message) => {
+    setIsLoadingMessages(true);
+    let fetchedChatHistory: Message[];
+    if (lastMessageId) {
+      const { data } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .in("message_type", ["input", "output"])
+        .lt("id", lastMessageId)
+        .order("id", { ascending: false })
+        .limit(10);
+      fetchedChatHistory = data!.reverse() ?? [];
+      setIsLoadingMessages(false);
+    } else {
+      setIsLoadingMessages(true);
+      const { data } = await supabase
+        .from("chat_messages")
+        .select("*")
+        .in("message_type", ["input", "output"])
+        .order("id", { ascending: false })
+        .limit(10);
+      fetchedChatHistory = data!.reverse() ?? [];
+      setIsLoadingMessages(false);
+    }
+    
+    fetchedChatHistory?.forEach((message: Message) => {
       if (message.message_type === "input") {
         message.content = { isOnlyTextMessage: true, reply: message.content };
         return message;
@@ -45,8 +63,13 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         return message;
       }
     });
-    
-    setChatHistory(data ?? []);
+    if(fetchedChatHistory.length>0){
+      setLastMessageId(fetchedChatHistory[0].id!);
+      setChatHistory((prevChatHistory) => [
+        ...fetchedChatHistory,
+        ...prevChatHistory,
+      ]);
+    }
   };
 
   const updateAssistantMessageStatus = (status: boolean) => {
@@ -55,7 +78,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ChatContext.Provider
-      value={{ chatHistory, isAssistantMessagePendding, addMessage, clearChat, fetchChatHistory, updateAssistantMessageStatus }}
+      value={{
+        chatHistory,
+        lastMessageId: lastMessageId!,
+        isLoadingMessages,
+        addMessage,
+        clearChat,
+        fetchChatHistory,
+      }}
     >
       {children}
     </ChatContext.Provider>

@@ -2,7 +2,7 @@ import type { Message } from "../../constants";
 
 function AssistantMessage({ message }: { message: Message }) {
   return (
-    <div className="w-fit max-w-full bg-assistant-message py-2 px-3 mb-5 rounded-2xl text-xs ml-2 relative shadow-xl">
+    <div className={`${message.content.todos ? "max-w-full" : "max-w-2/3"} w-fit bg-assistant-message py-2 px-3 mb-5 rounded-e-xl rounded-b-xl text-xs ml-2 relative shadow-xl`}>
       {message.content.reply}
       {!message.content.isOnlyTextMessage && (
         <div className="bg-white rounded-lg flex flex-col gap-1 mt-1 p-1">

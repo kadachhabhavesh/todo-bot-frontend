@@ -59,7 +59,7 @@ function ChatComposer() {
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center w-full h-full sticky bottom-0">
       <div className="bg-gray-100 p-2 rounded-lg flex flex-col gap-2 w-full">
         <TagList onTagClick={handleTagClick} />
         <div
