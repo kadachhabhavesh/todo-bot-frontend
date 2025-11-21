@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useChat } from "../context/ChatContext";
 import { MESSAGE_TYPE } from "../constants";
 import UserMessage from "./messages/UserMessage";
@@ -7,8 +7,13 @@ import ResponseLoading from "./messages/ResponseLoading";
 import ChatLoading from "./ChatLoading";
 
 function Chat() {
-  const { chatHistory, isAssistantMessagePendding, isLoadingMessages, fetchChatHistory } =
-    useChat();
+  const {
+    chatHistory,
+    isAssistantMessagePendding,
+    isLoadingMessages,
+    fetchChatHistory,
+    isFirstFetchRequest,
+  } = useChat();
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -16,13 +21,13 @@ function Chat() {
 
   const handleScroll = useCallback(async () => {
     const container = chatContainerRef.current;
-
     if (!container || loadingRef.current) return;
 
-    if (container.scrollTop <= 50) {
+    if (container.scrollTop <= 5) {
       loadingRef.current = true;
-      const prevHeight = container.scrollHeight;
-      await fetchChatHistory();
+
+      await fetchChatHistory(); // load older messages
+
       loadingRef.current = false;
     }
   }, [fetchChatHistory]);
@@ -34,10 +39,20 @@ function Chat() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  useLayoutEffect(() => {
+    if (!isFirstFetchRequest) return;
+
+    const container = chatContainerRef.current;
+    if (!container) return;
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+  }, [chatHistory, isAssistantMessagePendding, isFirstFetchRequest]);
+
   return (
     <div
       ref={chatContainerRef}
-      className="flex flex-col overflow-y-auto scroll-smooth"
+      className="flex flex-col overflow-y-auto scroll-smooth h-full"
     >
       {isLoadingMessages && <ChatLoading />}
       {chatHistory.map((message) => {

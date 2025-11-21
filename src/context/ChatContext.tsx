@@ -19,9 +19,11 @@ export const ChatContext = createContext<ChatContextType | undefined>(
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [isAssistantMessagePendding, setIsAssistantMessagePendding] = useState<boolean>(false);
   const [lastMessageId, setLastMessageId] = useState<number | undefined>(undefined);
+  const [isAssistantMessagePendding, setIsAssistantMessagePendding] = useState<boolean>(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
+  const [isFirstFetchRequest, setIsFirstFetchRequest] = useState<boolean>(true);
+
   
   const clearChat = () => setChatHistory([]);
 
@@ -30,9 +32,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchChatHistory = async () => {
+    console.log("---------");
+    
     setIsLoadingMessages(true);
     let fetchedChatHistory: Message[];
     if (lastMessageId) {
+      setIsFirstFetchRequest(false)
       const { data } = await supabase
         .from("chat_messages")
         .select("*")
@@ -45,15 +50,19 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setIsLoadingMessages(true);
       const { data } = await supabase
-        .from("chat_messages")
-        .select("*")
-        .in("message_type", ["input", "output"])
-        .order("id", { ascending: false })
-        .limit(10);
+      .from("chat_messages")
+      .select("*")
+      .in("message_type", ["input", "output"])
+      .order("id", { ascending: false })
+      .limit(10);
       fetchedChatHistory = data!.reverse() ?? [];
       setIsLoadingMessages(false);
     }
-    
+    await new Promise((res)=>{
+      setTimeout(()=>{
+        res("")
+      },500)
+    })
     fetchedChatHistory?.forEach((message: Message) => {
       if (message.message_type === "input") {
         message.content = { isOnlyTextMessage: true, reply: message.content };
@@ -83,6 +92,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         lastMessageId: lastMessageId!,
         isLoadingMessages,
         isAssistantMessagePendding,
+        isFirstFetchRequest,
         updateAssistantMessageStatus,
         addMessage,
         clearChat,

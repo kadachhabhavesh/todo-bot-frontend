@@ -19,6 +19,7 @@ export interface Todo {
     lastMessageId: number;
     isLoadingMessages: boolean;
     isAssistantMessagePendding: boolean,
+    isFirstFetchRequest: boolean,
     addMessage: (message: Message) => void;
     clearChat: () => void;
     fetchChatHistory: () => void;

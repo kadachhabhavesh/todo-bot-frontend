@@ -1,8 +1,6 @@
 import type { Message } from "../../constants";
 
 function AssistantMessage({ message }: { message: Message }) {
-  console.log(message);
-
   return (
     <div
       className={`${
