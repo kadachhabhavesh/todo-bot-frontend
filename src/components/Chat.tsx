@@ -20,7 +20,6 @@ function Chat() {
     if (!container || loadingRef.current) return;
 
     if (container.scrollTop <= 50) {
-      console.log(loadingRef.current);
       loadingRef.current = true;
       const prevHeight = container.scrollHeight;
       await fetchChatHistory();

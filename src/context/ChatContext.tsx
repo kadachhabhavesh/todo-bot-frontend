@@ -22,12 +22,12 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [isAssistantMessagePendding, setIsAssistantMessagePendding] = useState<boolean>(false);
   const [lastMessageId, setLastMessageId] = useState<number | undefined>(undefined);
   const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
+  
+  const clearChat = () => setChatHistory([]);
 
   const addMessage = (message: Message) => {
     setChatHistory((prev) => [...prev, message]);
   };
-
-  const clearChat = () => setChatHistory([]);
 
   const fetchChatHistory = async () => {
     setIsLoadingMessages(true);
@@ -82,9 +82,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         chatHistory,
         lastMessageId: lastMessageId!,
         isLoadingMessages,
+        isAssistantMessagePendding,
+        updateAssistantMessageStatus,
         addMessage,
         clearChat,
-        fetchChatHistory,
+        fetchChatHistory
       }}
     >
       {children}
