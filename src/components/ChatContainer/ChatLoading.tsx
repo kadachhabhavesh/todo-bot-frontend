@@ -11,7 +11,7 @@ function ChatLoading() {
           {/* USER bubble */}
           <div
             className={`
-              bg-linear-to-r from-blue-400 to-purple-500 text-white 
+              bg-[#167d7f] text-white 
               py-2 px-3 rounded-b-xl rounded-s-xl text-xs ${width}
               mr-2 self-end shadow-xl
             `}

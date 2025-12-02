@@ -3,22 +3,18 @@ import {
   useEffect
 } from "react";
 import { useChat } from "./context/ChatContext";
-import ChatComposer from "./components/ChatComposer";
-import Chat from "./components/Chat";
+import ChatBot from "./components/ChatContainer/ChatBot";
+import MyTodos from "./components/MyTodos/MyTodos";
 
 function App() {
-  const { fetchChatHistory } = useChat();
-
-  useEffect(() => {
-    fetchChatHistory();
-  }, []);
-
   return (
-    <div className="bg-background h-screen flex justify-center items-center font-mono overflow-hidden px-3 sm:py-5 -mb-6">
-      <div className="w-[450px] h-full grid grid-rows-[80%_20%]">
-        <Chat />
-        <ChatComposer />
-      </div>
+    <div className="bg-background h-screen font-mono overflow-hidden grid grid-cols-10 gap-3 px-3 sm:py-3">
+     <div className="min-h-full bg-white rounded-xl col-span-7">
+      <MyTodos />
+     </div>
+     <div className="min-h-full bg-white rounded-xl col-span-3">
+      <ChatBot />
+     </div>
     </div>
   );
 }

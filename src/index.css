@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #D0D1D6;
-  --color-assistant-message: #F2F1F6
+  --color-background: #98d7c2;
+  --color-assistant-message: #f2f2f2
 }
 
 ::-webkit-scrollbar {

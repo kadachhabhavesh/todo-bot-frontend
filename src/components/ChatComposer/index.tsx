@@ -1,14 +1,14 @@
 import React, { useState, type ChangeEvent } from "react";
-import { MAX_MESSAGE_LENGTH, MESSAGE_TYPE } from "../constants";
-import { useChat } from "../context/ChatContext";
+import { MAX_MESSAGE_LENGTH, MESSAGE_TYPE } from "../../constants";
+import { useChat } from "../../context/ChatContext";
 import { ArrowRight } from "lucide-react";
 import TagList from "./TagList";
-import { sendMessageToAssistant } from "../services/assistantApiService";
+import { sendMessageToAssistant } from "../../services/assistantApiService";
 
 function ChatComposer() {
   const [message, setMessage] = useState<string>("");
   const [messageError, setMessageError] = useState<string>("");
-  const { addMessage, updateAssistantMessageStatus } = useChat();
+  const { addMessage, updateAssistantMessageStatus, handleDeveloperActions } = useChat();
 
   const handleMessageChnage = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = event.target;
@@ -20,6 +20,7 @@ function ChatComposer() {
   const handleSendMessageToAssistant = async (userMessage: string) => {
     addMessage({
       role: MESSAGE_TYPE.USER,
+      created_at: new Date().toString(),
       content: {
         isOnlyTextMessage: true,
         reply: userMessage,
@@ -27,6 +28,7 @@ function ChatComposer() {
     });
     updateAssistantMessageStatus(true);
     const assistantReply = await sendMessageToAssistant(userMessage);
+    handleDeveloperActions(assistantReply.forDeveloper)
     updateAssistantMessageStatus(false);
     addMessage({
       role: MESSAGE_TYPE.ASSISTANT,
@@ -59,12 +61,12 @@ function ChatComposer() {
   };
 
   return (
-    <div className="flex items-center w-full h-full sticky bottom-0">
-      <div className="bg-gray-100 p-2 rounded-lg flex flex-col gap-2 w-full">
+    <div className="flex items-end w-full h-full sticky bottom-0">
+      <div className="bg-white rounded-lg flex flex-col gap-2 w-full">
         <TagList onTagClick={handleTagClick} />
         <div
           className={`h-20 bg-white w-full flex flex-row items-end rounded-md shadow-2xl shadow-stone-300 border border-gray-300 relative ${
-            messageError && "ring-1 ring-red-500"
+            messageError && "outline-3 outline-offset-3 outline-red-400"
           }`}
         >
           <textarea
